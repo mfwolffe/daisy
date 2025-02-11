@@ -16,6 +16,34 @@ from pydub import AudioSegment
 from pydub.playback import play
 from config import AUDIO_FILE
 
+# NOTE: not sure how it'll fare performance wise with
+#       the voice synthesis
+#
+#
+def process_raw(audio, decay_factor):
+    """
+      Applies low-pass filtering and distortions to help
+      with simulation of progressive voice degradation
+
+      The larger the decay_factor, the HAL sounds degraded, and,
+      closer to shutdown :( (or should it be :) ?)
+    """
+    low_pass_end   = 800
+    low_pass_start = 3000
+
+
+    # NOTE: apply decay factor to frequency range
+    #       @ decay = 0.0 -> 3000 (HZ), ie, clear, normal voice
+    #        ...
+    #       @ decay = 1.0 -> 800 (Hz), ie, should be barely recognizable
+    #
+    cutoff_freq = int(low_pass_start - (low_pass_start - low_pass_end) * (1 - decay_factor))
+    logging.debug(f"Applying low-pass filter: {cutoff_freq} Hz")
+    audio = apply_low_pass(audio, cutoff_freq)
+
+    audio = apply_glitch_effect(audio, intensity=decay_factor)
+
+    return audio
 
 
 def apply_low_pass(audio, cutoff_freq):
