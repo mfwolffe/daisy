@@ -13,6 +13,11 @@ SYSTEM_CONFIG_PATH = "/etc/daisy/config.yaml"
 USER_CONFIG_PATH   = os.path.expanduser("~/.config/daisy/config.yaml")
 
 
+def validate_audio_file(path):
+    """Ensure audio file both exists and is readable."""
+    return os.path.exists(path) and os.access(path, os.R_OK)
+
+
 # NOTE: fallback to local assets path in dev
 #
 #
