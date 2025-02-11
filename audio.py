@@ -21,6 +21,14 @@ from config import AUDIO_FILE
 def apply_low_pass(audio, cutoff_freq):
     """
       Applies a low-pass filter to simulate HAL's muffled shutdown
+
+      The lower the `cutoff_freq`, the more muffled and distant HAL’s voice sounds.
+      examples:
+          500   (Hz) -> no effect
+          3000  (Hz) -> slightly muffled
+          1500  (Hz) -> Noticeably muffled
+          800   (Hz) -> Very muffled, depending on sample probably inaudible
+
     """
     return audio.low_pass_filter(cutoff_freq)
 
