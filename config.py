@@ -10,7 +10,12 @@ import yaml
 import logging
 
 SYSTEM_CONFIG_PATH = "/etc/daisy/config.yaml"
-USER_CONFIG_PATH = os.path.expanduser("~/.config/daisy/config.yaml")
+USER_CONFIG_PATH   = os.path.expanduser("~/.config/daisy/config.yaml")
+
+LOCAL_AUDIO   = "assets/daisy.mp3"
+DEFAULT_AUDIO = "/usr/share/daisy/daisy.mp3"
+AUDIO_FILE    = DEFAULT_AUDIO if os.path.exists(DEFAULT_AUDIO) else LOCAL_AUDIO
+
 
 DEFAULT_CONFIG = {
   # TODO @mfwolffe deb install or rules needs this path def
