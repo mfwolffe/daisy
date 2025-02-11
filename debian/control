@@ -1,0 +1,8 @@
+Package: daisy
+Version: 0.0.1a
+Section: sound
+Priority: optional
+Architecture: all
+Depends: python3, python3-pip, ffmpeg
+Maintainer: Matthew Forrester Wolffe mfwolffe@outlook.com
+Description: HAL 9000 tribute program that sings Daisy Bell.

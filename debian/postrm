@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+# TODO: @mfwolffe robust config removal as at this
+#                 point there are several possible
+#                 config paths
+#
+rm -rf "$HOME/.config/daisy" || echo "bad config, matt ;)"
+
+exit 0

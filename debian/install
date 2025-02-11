@@ -1,0 +1,3 @@
+assets/daisy.mp3 usr/share/daisy/
+daisy.py usr/bin/daisy
+config.yaml etc/daisy/config.yaml
