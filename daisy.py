@@ -43,11 +43,35 @@ def main():
     args = parse_cli()
     setup_logger(args.debug)
 
-    config        = load_config(args.config)
-    volume        = args.volume if args.volume is not None else config["volume"]
-    flicker_speed = args.flicker_speed if args.flicker_speed is not None else config["flicker_speed"]
-    voice         = args.voice if args.voice else config["voice"]
+    config   = load_config(args.config)
+    voice    = args.voice if args.voice else config["voice"]
+    volume   = args.volume if args.volume is not None else config["volume"]
+    flck_spd = args.flicker_speed if args.flicker_speed is not None else config["flicker_speed"]
 
-    logging.info(f"Using config - Volume: {volume}, Flicker Speed: {flicker_speed}, Voice: {voice}")
+    logging.info(f"Using config - Volume: {volume}, Flicker Speed: {flck_spd}, Voice: {voice}")
+
+    # NOTE: thread task targets are placeholders for now
+    #       That said, most everything is done ...elsewhere
+    # TODO: @mfwolffe write them ;)
+    #
+    audio_thread = threading.Thread(target=play_daisy_bell, args=(volume, voice))
+    graphics_thread = threading.Thread(target=render_hal_eye, args=(flicker_speed,))
+
+
+    # NOTE: embrasingly parallel, so not much synchronization 
+    #       needed?
+    # TODO: @mfwolffe handling for thread errors in their
+    #                 respective files 
+    audio_thread.start()
+    graphics_thread.start()
+
+    audio_thread.join()
+    graphics_thread.join()
+
+    console.print("HAL has shut down.", style="dim")
+
+
+if __name__ == "__main__":
+    main()
 
 
