@@ -21,6 +21,7 @@ console = Console()
 #
 #
 def parse_cli():
+    """ Parse command line for daisy cli """
     parsely = argparse.ArgumentParser(description="Daisy CLI | An Ode to Heuristics ;)")
 
     parsely.add_argument("--config", type=str, help="Path to custom user config")
@@ -32,3 +33,8 @@ def parse_cli():
     return parsely.parse_args()
 
 
+def setup_logger(debug):
+    """ init logger for daisy cli """
+    level = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig(format="%(asctime)s - %(levelname)s: %(message)s", level=level)
+    
