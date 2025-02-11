@@ -1,0 +1,5 @@
+rich
+pygame
+pyttsx3
+pydub
+pyyaml
