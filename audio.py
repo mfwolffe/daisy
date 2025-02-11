@@ -50,3 +50,25 @@ def apply_glitch_effect(audio, intensity=0.2):
         logging.debug("Applying glitch effect")
         return audio.set_frame_rate(int(audio.frame_rate * (1 - intensity)))
     return audio
+
+
+def daisy_daisy(volume=1.0, voice="synth"):
+    """ Handles playbackk of daisy bell, whether voice synthesis or prerecorded """
+    logging.info(f"Playing 'Daisy Bell' with {voice} mode at volume {volume}")
+
+    if voice == "recording":
+        try:
+            pygame.mixer.init()
+            pygame.mixer.music.load(AUDIO_FILE)
+            pygame.mixer.music.set_volume(volume)
+            pygame.mixer.music.play()
+
+            # NOTE: to prevent exit & thread terminating early
+            #
+            #
+            while pygame.mixer.music.get_busy():
+                pass
+            
+        except pygame.error as e:
+            logging.error(f"audio playback failure: {e}")
+            return
