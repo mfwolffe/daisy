@@ -56,6 +56,11 @@ def daisy_daisy(volume=1.0, voice="synth"):
     """ Handles playbackk of daisy bell, whether voice synthesis or prerecorded """
     logging.info(f"Playing 'Daisy Bell' with {voice} mode at volume {volume}")
 
+    # NOTE: the effects are not applied atm in either format; 
+    #       making this modular will require a bit of consideration
+    #       since one is audio generated on the fly and the other is pre-
+    #       recorded
+    #
     if voice == "recording":
         try:
             pygame.mixer.init()
@@ -64,11 +69,28 @@ def daisy_daisy(volume=1.0, voice="synth"):
             pygame.mixer.music.play()
 
             # NOTE: to prevent exit & thread terminating early
-            #
+            #       switched from `pass` to sleeping to avoid busy wait
+            # TODO: @mfwolffe testing on the waiting
             #
             while pygame.mixer.music.get_busy():
-                pass
+                time.sleep(0.1)
             
         except pygame.error as e:
             logging.error(f"audio playback failure: {e}")
             return
+    elif voice == "synth":
+        engine = pyttsx3.init()
+        engine.setProperty("volume", volume)
+
+        lyrics = [
+            "Daisy, Daisy, give me your answer, do...",
+            "I'm half crazy, all for the love of you...",
+            "It won't be a stylish marriage...",
+            "I can't afford a carriage...",
+            "But you'll look sweet upon the seat...",
+            "Of a bicycle built for two..."
+        ]
+
+        for line in lyrics:
+            engine.say(line)
+            engine.runAndWait()
