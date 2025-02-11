@@ -28,12 +28,24 @@ def apply_low_pass(audio, cutoff_freq):
           3000  (Hz) -> slightly muffled
           1500  (Hz) -> Noticeably muffled
           800   (Hz) -> Very muffled, depending on sample probably inaudible
-
     """
     return audio.low_pass_filter(cutoff_freq)
 
 def apply_glitch_effect(audio, intensity=0.2):
-    """ Randomly introduces distortion effects to mimic HAL’s failing voice """
+    """ 
+        Randomly introduces distortion effects to mimic HAL’s failing voice 
+
+        Does so by reducing sample rate to yield glitch effects, causing HAL to 
+        exude instability
+        Higher values of `intensity` create larger corruptions
+
+        examples:
+            0.0 -> No effect
+            0.1 -> Mild, occasional glitch
+            0.3 -> Frequent distortion
+            0.7 -> severe degradation
+            1.0 -> heavy corruption; likely incomprehensible
+    """
     if random.random() < 0.2:
         logging.debug("Applying glitch effect")
         return audio.set_frame_rate(int(audio.frame_rate * (1 - intensity)))
