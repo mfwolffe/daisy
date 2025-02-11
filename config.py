@@ -1,5 +1,5 @@
 """
-Config for daisy
+Config handler for daisy
 While the project is entirely a joke, I'm planning to package
 As such, things should be FHS compliant
 """
@@ -33,3 +33,24 @@ DEFAULT_CONFIG = {
   #
   "voice": "synth",
 }
+
+
+def load_config(config_path=None):
+    """Load YAML config, fall back to defaults if missing."""
+
+    if config_path:
+        logging.info(f"Loading custom config from {config_path}")
+        paths_to_try = [config_path]
+    else:
+        paths_to_try = [USER_CONFIG_PATH, SYSTEM_CONFIG_PATH]
+
+    for path in paths_to_try:
+        if os.path.exists(path):
+            try:
+                with open(path, "r") as f:
+                    return yaml.safe_load(f)
+            except Exception as e:
+                logging.error(f"Failed to load config from {path}: {e}")
+
+    logging.warning("No valid config found. Using defaults.")
+    return DEFAULT_CONFIG
