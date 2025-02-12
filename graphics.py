@@ -29,4 +29,34 @@ def blink_blink(console, flicker_speed=None):
 
     logging.info(f"Rendering HAL’s eye with flicker speed: {flicker_speed if flicker_speed else 'default range'}")
 
-    
+    # NOTE: eye states with ansi styling
+    #       this 'graphic' is not permanent
+    #       (it's quite rudimentary - ●)
+    #       but so is Hal's eye; just a pin of light.
+    #       it's fine. matt's fine.
+    #
+    # TODO: @mfwolffe better graphic and effect
+    # 
+    frames = [
+        "[bold red]●[/bold red]",
+        "[red]●[/red]",
+        "[dim red]●[/dim red]",
+        " ",
+    ]
+
+    for _ in range(DEFAULT_CONFIG.get("flicker_duration", 50)):
+        flicer_time = flicker_speed if flicker_speed else random.uniform(0.05, 0.2)
+
+        # NOTE: picks a (weighted) random flicker frame/eye state
+        #       (brighter more likely), then updates the 
+        #       rendered eye in place in the conosle, and
+        #       and finally waits
+        #
+        frame = random.choices(frames, weights=[4, 3, 2, 1])[0]
+        console.print(Text(frame, justify="center"), end="\r")
+        time.sleep(flicer_time)
+
+    # NOTE: ensures 'hal shutdown' by overwriting 
+    #       last frame
+    #
+    console.print(Text(" ", justify="center"))
