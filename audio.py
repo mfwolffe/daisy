@@ -166,8 +166,11 @@ def daisy_daisy(volume=1.0, voice="synth"):
 
             # see note above for loop header 
             audio_io = io.BytesIO()
-            engine.save_to_file(line, audio_io)
+            engine.save_to_file(line, "temp.wav")
             engine.runAndWait()
+
+            with open("temp.wav", "rb") as f:
+                audio_io.write(f.read())
 
             audio_io.seek(0)
             audio = AudioSegment.from_file(audio_io, format="wav")
