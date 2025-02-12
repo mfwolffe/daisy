@@ -73,7 +73,7 @@ def process_raw(audio, decay_factor):
       Applies low-pass filtering and distortions to help
       with simulation of progressive voice degradation
 
-      The larger the decay_factor, the HAL sounds degraded, and,
+      The larger the decay_factor (a float 0.0 - 1.0), the HAL sounds degraded, and,
       closer to shutdown :( (or should it be :) ?)
     """
     low_pass_end   = 800
@@ -98,15 +98,12 @@ def daisy_daisy(volume=1.0, voice="synth"):
     """ Handles playbackk of daisy bell, whether voice synthesis or prerecorded """
     logging.info(f"Playing 'Daisy Bell' with {voice} mode at volume {volume}")
 
-    # NOTE: the effects are not applied atm in either format; 
-    #       making this modular will require a bit of consideration
-    #       since one is audio generated on the fly and the other is pre-
-    #       recorded
+    # NOTE: making this modular will required a bit of consideration, and I'm
+    #       not sold this approach is best (when is any approach, esp. one I choose, best, after all?)
+    #       since one is audio generated on the fly and the other is pre-recorded
     #
     if voice == "recording":
         try:
-            pygame.mixer.init()
-            # pygame.mixer.music.load(AUDIO_FILE)
             pygame.mixer.music.set_volume(volume)
 
             audio = AudioSegment.from_file(AUDIO_FILE, format="mp3")
@@ -136,6 +133,17 @@ def daisy_daisy(volume=1.0, voice="synth"):
         except Exception as e:
             logging.error(f"Unexpected error during playback: {e}")
             return
+        
+    # NOTE: this approach requires some commenting on
+    #       The io ops introduced should not actually cause 
+    #       large slowdowns, as ByteIO() avoids disk writes
+    #
+    #       unless pyttsx3's save_to_file is excessively slow,
+    #       it shouldn't be a concern
+    #
+    # TODO: @mfwolffe pay attention to hangs in voice synth
+    #                 and test against io operations
+    #
     elif voice == "synth":
         engine = pyttsx3.init()
         engine.setProperty("volume", volume)
@@ -151,8 +159,20 @@ def daisy_daisy(volume=1.0, voice="synth"):
         #       and other python shorthands back during square 1 (the recapitulation, that is)
         #
         for i, line in enumerate(LYRICS):
-            pass
+            decay_factor = i / LINES
 
-        for line in LYRICS:
-            engine.say(line)
+            slowed_rate = int(base_rate - (base_rate - min_rate) * (1 - decay_factor))
+            engine.setProperty("rate", slowed_rate)
+
+            # see note above for loop header 
+            audio_io = io.BytesIO()
+            engine.save_to_file(line, audio_io)
             engine.runAndWait()
+
+            audio_io.seek(0)
+            audio = AudioSegment.from_file(audio_io, format="wav")
+
+            processed = process_raw(audio, decay_factor)
+            play(processed)
+
+            time.sleep(0.5 * (1 - decay_factor))
