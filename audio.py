@@ -140,6 +140,18 @@ def daisy_daisy(volume=1.0, voice="synth"):
         engine = pyttsx3.init()
         engine.setProperty("volume", volume)
 
+        min_rate  = 40
+        base_rate = 100
+
+        # TODO: @mfwolffe apply processing
+        #
+        # NOTE: shoutout to Robert, and not for bagels or explaining CMYK
+        #       color spaces (acmY? :iykyk). That guy is an apparition.
+        #       Oliver though, that one, shoutout to him for showing me enumerate()
+        #       and other python shorthands back during square 1 (the recapitulation, that is)
+        #
+        for i, line in enumerate(LYRICS):
+            pass
 
         for line in LYRICS:
             engine.say(line)
