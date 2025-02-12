@@ -6,14 +6,15 @@ for audio playback and 'graphics' (`rich`) rendering
 """
 
 
-import argparse
-import threading
-import logging
 import time
 import pygame
+import logging
+import argparse
+import threading
 from audio import daisy_daisy
-from rich.console import Console
 from config import load_config
+from graphics import blink_blink
+from rich.console import Console
 
 
 console = Console()
@@ -64,7 +65,7 @@ def main():
     # TODO: @mfwolffe write them ;)
     #
     audio_thread = threading.Thread(target=daisy_daisy, args=(volume, voice))
-    graphics_thread = threading.Thread(target=render_hal_eye, args=(flk_spd,))
+    graphics_thread = threading.Thread(target=blink_blink, args=(console, flk_spd))
 
 
     # NOTE: embrasingly parallel, so not much synchronization
