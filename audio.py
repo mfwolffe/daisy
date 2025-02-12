@@ -68,7 +68,8 @@ def apply_glitch_effect(audio, intensity=0.2):
 #       the voice synthesis
 #
 #
-def process_raw(audio, decay_factor):
+# def process_raw(audio, decay_factor):
+def process_raw(audio, decay_factor, glitch_intensity, lowpass_max, lowpass_min):
     """
       Applies low-pass filtering and distortions to help
       with simulation of progressive voice degradation
@@ -85,7 +86,8 @@ def process_raw(audio, decay_factor):
     #        ...
     #       @ decay = 1.0 -> 800  (Hz), ie, should be barely recognizable
     #
-    cutoff_freq = int(low_pass_start - (low_pass_start - low_pass_end) * (1 - decay_factor))
+    # cutoff_freq = int(low_pass_start - (low_pass_start - low_pass_end) * (1 - decay_factor))
+    cutoff_freq = int(lowpass_max - (lowpass_max - lowpass_min) * (1 - decay_factor))
     logging.debug(f"Applying low-pass filter: {cutoff_freq} Hz")
     audio = apply_low_pass(audio, cutoff_freq)
 
@@ -94,7 +96,7 @@ def process_raw(audio, decay_factor):
     return audio
 
 
-def daisy_daisy(volume=1.0, voice="synth"):
+def daisy_daisy(volume=1.0, voice="synth", glitch_intensity=0.2, lowpass_max=3000, lowpass_min=800):
     """ Handles playbackk of daisy bell, whether voice synthesis or prerecorded """
     logging.info(f"Playing 'Daisy Bell' with {voice} mode at volume {volume}")
 
@@ -110,7 +112,7 @@ def daisy_daisy(volume=1.0, voice="synth"):
 
             for i in range(LINES):
                 decay_factor = i / LINES
-                processed = process_raw(audio, decay_factor)
+                processed = process_raw(audio, decay_factor, glitch_intensity, lowpass_max, lowpass_min)
                 play(processed)
 
         # NOTE: to prevent exit & thread terminating early
@@ -175,7 +177,7 @@ def daisy_daisy(volume=1.0, voice="synth"):
             audio_io.seek(0)
             audio = AudioSegment.from_file(audio_io, format="wav")
 
-            processed = process_raw(audio, decay_factor)
+            processed = process_raw(audio, decay_factor, glitch_intensity, lowpass_max, lowpass_min)
             play(processed)
 
             time.sleep(0.5 * (1 - decay_factor))

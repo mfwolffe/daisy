@@ -33,6 +33,14 @@ def parse_cli():
     parsely.add_argument("--voice", choices=["synth", "recording"], help="Choose voice mode (voice synthesis or the IBM 7094)")
     parsely.add_argument("--debug", action="store_true", help="Enable debug logging")
 
+    # NOTE: added for faster tests of the audio effects
+    #
+    #
+    parsely.add_argument("--glitch-intensity", type=float, help="Set glitch effect intensity (0.0 - 1.0)")
+    parsely.add_argument("--lowpass-max", type=int, help="Set starting low-pass cutoff frequency (Hz)")
+    parsely.add_argument("--lowpass-min", type=int, help="Set final low-pass cutoff frequency (Hz)")
+
+
     return parsely.parse_args()
 
 
@@ -53,6 +61,10 @@ def main():
 
     logging.info(f"Using config - Volume: {volume}, Flicker Speed: {flk_spd}, Voice: {voice}")
 
+    glitch_intensity = args.glitch_intensity if args.glitch_intensity is not None else config.get("glitch_intensity", 0.2)
+    lowpass_max = args.lowpass_max if args.lowpass_max is not None else config.get("lowpass_max", 3000)
+    lowpass_min = args.lowpass_min if args.lowpass_min is not None else config.get("lowpass_min", 800)
+
     # NOTE: I did not realize before that after this call 
     #       SDL audio backend state is updated, and the context
     #       is process-wide
@@ -64,7 +76,7 @@ def main():
     #       That said, most everything is done ...elsewhere
     # TODO: @mfwolffe write them ;)
     #
-    audio_thread = threading.Thread(target=daisy_daisy, args=(volume, voice))
+    audio_thread = threading.Thread(target=daisy_daisy, args=(volume, voice, glitch_intensity, lowpass_max, lowpass_min))
     graphics_thread = threading.Thread(target=blink_blink, args=(console, flk_spd))
 
 
