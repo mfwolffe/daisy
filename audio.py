@@ -16,6 +16,18 @@ from pydub import AudioSegment
 from pydub.playback import play
 from config import AUDIO_FILE
 
+
+LYRICS = [
+    "Daisy, Daisy, give me your answer, do...",
+    "I'm half crazy, all for the love of you...",
+    "It won't be a stylish marriage...",
+    "I can't afford a carriage...",
+    "But you'll look sweet upon the seat...",
+    "Of a bicycle built for two..."
+]
+
+LINES = len(LYRICS)
+
 # NOTE: not sure how it'll fare performance wise with
 #       the voice synthesis
 #
@@ -35,7 +47,7 @@ def process_raw(audio, decay_factor):
     # NOTE: apply decay factor to frequency range
     #       @ decay = 0.0 -> 3000 (HZ), ie, clear, normal voice
     #        ...
-    #       @ decay = 1.0 -> 800 (Hz), ie, should be barely recognizable
+    #       @ decay = 1.0 -> 800  (Hz), ie, should be barely recognizable
     #
     cutoff_freq = int(low_pass_start - (low_pass_start - low_pass_end) * (1 - decay_factor))
     logging.debug(f"Applying low-pass filter: {cutoff_freq} Hz")
@@ -92,33 +104,44 @@ def daisy_daisy(volume=1.0, voice="synth"):
     if voice == "recording":
         try:
             pygame.mixer.init()
-            pygame.mixer.music.load(AUDIO_FILE)
+            # pygame.mixer.music.load(AUDIO_FILE)
             pygame.mixer.music.set_volume(volume)
-            pygame.mixer.music.play()
 
-            # NOTE: to prevent exit & thread terminating early
-            #       switched from `pass` to sleeping to avoid busy wait
-            # TODO: @mfwolffe testing on the waiting
-            #
-            while pygame.mixer.music.get_busy():
-                time.sleep(0.1)
-            
-        except pygame.error as e:
-            logging.error(f"audio playback failure: {e}")
+            audio = AudioSegment.from_file(AUDIO_FILE, format="mp3")
+
+            for i in range(LINES):
+                decay_factor = i / LINES
+                processed = process_raw(audio, decay_factor)
+                play(processed)
+
+        # NOTE: to prevent exit & thread terminating early
+        #       switched from `pass` to sleeping to avoid busy wait
+        # TODONT: @mfwolffe testing on the waiting
+        # NOTE: with the opted approach to produce a degradation the
+        #       guarding below is no longer necessary
+        # while pygame.mixer.music.get_busy():
+        #     time.sleep(0.1)
+        # NOTE: pygame is also only being used now for volume 
+        #       (maybe drop it altogether idk), so exception handling
+        #       needed reapproaching
+        # except pygame.error as e:
+        except FileNotFoundError:
+            logging.error(f"Audio file not found: {AUDIO_FILE}")
+            return
+        except PermissionError:
+            logging.error(f"Permission denied: cannot read {AUDIO_FILE}")
+            return
+        except Exception as e:
+            logging.error(f"Unexpected error during playback: {e}")
             return
     elif voice == "synth":
         engine = pyttsx3.init()
         engine.setProperty("volume", volume)
 
-        lyrics = [
-            "Daisy, Daisy, give me your answer, do...",
-            "I'm half crazy, all for the love of you...",
-            "It won't be a stylish marriage...",
-            "I can't afford a carriage...",
-            "But you'll look sweet upon the seat...",
-            "Of a bicycle built for two..."
-        ]
+        # TODO: @mfwolffe apply processing 
+        #
+        #
 
-        for line in lyrics:
+        for line in LYRICS:
             engine.say(line)
             engine.runAndWait()
