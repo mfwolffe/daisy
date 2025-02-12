@@ -2,3 +2,7 @@ halenv/*
 
 # homebrew formula, need to finish
 daisy.rb
+
+temp.wav
+
+__pycache__/*
