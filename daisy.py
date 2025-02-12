@@ -10,6 +10,8 @@ import argparse
 import threading
 import logging
 import time
+import pygame
+from audio import daisy_daisy
 from rich.console import Console
 from config import load_config
 
@@ -46,20 +48,27 @@ def main():
     config   = load_config(args.config)
     voice    = args.voice if args.voice else config["voice"]
     volume   = args.volume if args.volume is not None else config["volume"]
-    flck_spd = args.flicker_speed if args.flicker_speed is not None else config["flicker_speed"]
+    flk_spd = args.flicker_speed if args.flicker_speed is not None else config["flicker_speed"]
 
-    logging.info(f"Using config - Volume: {volume}, Flicker Speed: {flck_spd}, Voice: {voice}")
+    logging.info(f"Using config - Volume: {volume}, Flicker Speed: {flk_spd}, Voice: {voice}")
+
+    # NOTE: I did not realize before that after this call 
+    #       SDL audio backend state is updated, and the context
+    #       is process-wide
+    #       As such, initialize before threads forked
+    #
+    pygame.mixer.init()
 
     # NOTE: thread task targets are placeholders for now
     #       That said, most everything is done ...elsewhere
     # TODO: @mfwolffe write them ;)
     #
-    audio_thread = threading.Thread(target=play_daisy_bell, args=(volume, voice))
-    graphics_thread = threading.Thread(target=render_hal_eye, args=(flicker_speed,))
+    audio_thread = threading.Thread(target=daisy_daisy, args=(volume, voice))
+    graphics_thread = threading.Thread(target=render_hal_eye, args=(flk_spd,))
 
 
-    # NOTE: embrasingly parallel, so not much synchronization 
-    #       needed?
+    # NOTE: embrasingly parallel, so not much synchronization
+    #       protection needed?
     # TODO: @mfwolffe handling for thread errors in their
     #                 respective files 
     audio_thread.start()
